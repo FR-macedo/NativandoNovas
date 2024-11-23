@@ -14,7 +14,9 @@
     "format:frontend": "npm run prettier --prefix frontend",
     "format:backend": "npm run prettier --prefix backend"
   },
-  "dependencies": {},
+  "dependencies": {
+    "nativenews": "file:"
+  },
   "devDependencies": {
     "concurrently": "^8.2.0"
   }
