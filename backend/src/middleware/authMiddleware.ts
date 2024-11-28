@@ -1,22 +1,37 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { User } from '../modelos/usuario';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { user } from "../modelos/user";
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
-  const token = req.headers.authorization?.split(' ')[1];
+// Middleware de autenticação de token
+export const authenticateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  // Extrai o token da autorização no header
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return next(new Error('Token de autenticação é necessário'));  // Usando next() com erro
+    // Se não encontrar o token, retorna erro
+    return next(new Error("Token de autenticação é necessário"));
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err, user) => {
-    if (err) {
-      return next(new Error('Token inválido'));  // Passando erro para next()
-    }
+  try {
+    // Verifica o token usando a chave secreta
+    jwt.verify(token, process.env.JWT_SECRET!, (err, decodedUser) => {
+      if (err) {
+        // Se houver erro na verificação do token, retorna erro
+        return next(new Error("Token inválido"));
+      }
 
-    // Atribui a propriedade user com o tipo User
-    req.user = user as User;
+      // Atribui o usuário decodificado ao req.user com o tipo correto
+      req.user = decodedUser as user;
 
-    next();  // Chama o próximo middleware ou a função de rota
-  });
+      // Chama o próximo middleware ou a função da rota
+      next();
+    });
+  } catch (error) {
+    // Se ocorrer erro em qualquer parte do processo, retorna erro genérico
+    next(new Error("Erro na autenticação do token"));
+  }
 };
